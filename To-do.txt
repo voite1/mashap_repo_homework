@@ -1,0 +1,19 @@
+Homework
+
+For your homework this week, you’ll be polishing this mashup.
+
+Begin by sorting the results of our search by the average score.
+
+Then, update your script to allow the user to choose how to sort, by average, high score or most inspections:
+
+(soupenv)$ python mashup.py highscore
+
+Next, allow the user to choose how many results to map:
+
+(soupenv)$ python mashup.py highscore 25
+
+Or allow them to reverse the results, showing the lowest scores first:
+
+(soupenv)$ python mashup.py highscore 25 reverse
+
+If you’re feeling particularly adventurous, see if you can use the argparse module from the standard library to handle command line arguments
