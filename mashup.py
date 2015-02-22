@@ -162,3 +162,8 @@ if __name__ == '__main__':
         total_result['features'].append(geojson)
     with open('my_map.json', 'w') as fh:
         json.dump(total_result, fh)
+
+    for result in result_generator(10):
+        print result
+        print 
+        print
