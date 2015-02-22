@@ -133,6 +133,11 @@ def result_generator(count):
         metadata = extract_restaurant_metadata(data_div)
         inspection_data = get_score_data(data_div)
         metadata.update(inspection_data)
+
+        ### here is where the resulte is passed from the __main__
+        #  sort the list of dictionaries: newlist = sorted(list_to_be_sorted, key=lambda k: k['name']) 
+        print metadata['High Score']
+        print metadata['Total Inspections']
         yield metadata
 
 
