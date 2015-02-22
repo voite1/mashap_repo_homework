@@ -211,3 +211,12 @@ if __name__ == '__main__':
         print result
         print 
         print
+
+    '''
+g is  the representation of total_result with (with one result only)
+>>> g['features'][0]['properties']['High Score']
+92
+>>> g['features'][0]['properties']['Total Inspections']
+5
+>>>
+    '''
