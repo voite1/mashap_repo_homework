@@ -3,6 +3,7 @@ import geocoder
 import json
 import re
 import requests
+import sys
 
 
 INSPECTION_DOMAIN = 'http://info.kingcounty.gov'
@@ -156,14 +157,57 @@ def get_geojson(result):
 
 
 if __name__ == '__main__':
+    # added the block below to specify the number of restaurants
+    usage = "Usage: highscore|inspections <num_of_results> <reversed>"
+    number = 0
+
+    if len(sys.argv) == 4:
+        if sys.argv[3] == "reversed":
+            # do reverse display
+            number = 10
+        else:
+            print usage, 1
+            sys.exit(1)
+
+    if len(sys.argv) >= 3:
+        try:
+            number = int(sys.argv[2])
+        except ValueError, e:
+            print usage, 2
+            print str(e)
+            sys.exit(2)
+
+    if len(sys.argv) >= 2:
+        if sys.argv[1] == "highscore":
+            # do descending sort
+            # sent number if there
+            if len(sys.argv) == 2:
+                number = 10
+        elif sys.argv[1] == "inspections":
+            # do ascending sort
+            # set default result count
+            if len(sys.argv) == 2:
+                number == 10 
+        else:
+            print usage, 3
+            sys.exit(3)
+
+    if len(sys.argv) == 1:
+        print usage, 4
+        sys.exit(4)
+
+
     total_result = {'type': 'FeatureCollection', 'features': []}
-    for result in result_generator(10):
+    
+    for result in result_generator(number):
         geojson = get_geojson(result)
         total_result['features'].append(geojson)
     with open('my_map.json', 'w') as fh:
         json.dump(total_result, fh)
 
-    for result in result_generator(10):
+
+
+    for result in result_generator(number):
         print result
         print 
         print
