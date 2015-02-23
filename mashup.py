@@ -161,7 +161,7 @@ def get_geojson(result):
 
 if __name__ == '__main__':
     # added the block below to specify the number of restaurants
-    usage = "Usage: highscore|inspections <num_of_results> <reversed>"
+    usage = "Usage: python " + sys.argv[0] + " highscore|inspections|average <num_of_results> <reversed>"
     # defalut return count
     number = 10
     # default sort order
@@ -177,7 +177,7 @@ if __name__ == '__main__':
     if len(sys.argv) >= 3:
         try:
             number = int(sys.argv[2])
-        except ValueError, e:
+        except ValueError:
             print usage
             sys.exit(2)
 
