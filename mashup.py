@@ -4,6 +4,7 @@ import json
 import re
 import requests
 import sys
+from operator import itemgetter
 
 
 INSPECTION_DOMAIN = 'http://info.kingcounty.gov'
@@ -118,27 +119,24 @@ def get_score_data(elem):
     return data
 
 
-def result_generator(count):
+def result_generator():
     use_params = {
         'Inspection_Start': '2/1/2013',
         'Inspection_End': '2/1/2015',
         'Zip_Code': '98101'
     }
+    lst=[]
     # html, encoding = get_inspection_page(**use_params)
     html, encoding = load_inspection_page('inspection_page.html')
     parsed = parse_source(html, encoding)
     content_col = parsed.find("td", id="contentcol")
     data_list = restaurant_data_generator(content_col)
-    for data_div in data_list[:count]:
+    for data_div in data_list:
         metadata = extract_restaurant_metadata(data_div)
         inspection_data = get_score_data(data_div)
         metadata.update(inspection_data)
-
-        ### here is where the resulte is passed from the __main__
-        #  sort the list of dictionaries: newlist = sorted(list_to_be_sorted, key=lambda k: k['name']) 
-        print metadata['High Score']
-        print metadata['Total Inspections']
-        yield metadata
+        lst.append(metadata)
+    return lst
 
 
 def get_geojson(result):
@@ -164,64 +162,59 @@ def get_geojson(result):
 if __name__ == '__main__':
     # added the block below to specify the number of restaurants
     usage = "Usage: highscore|inspections <num_of_results> <reversed>"
-    number = 0
+    # defalut return count
+    number = 10
+    # default sort order
+    reversed = True
 
     if len(sys.argv) == 4:
         if sys.argv[3] == "reversed":
-            # do reverse display
-            number = 10
+            reversed = False
         else:
-            print usage, 1
+            print usage
             sys.exit(1)
 
     if len(sys.argv) >= 3:
         try:
             number = int(sys.argv[2])
         except ValueError, e:
-            print usage, 2
-            print str(e)
+            print usage
             sys.exit(2)
 
     if len(sys.argv) >= 2:
-        if sys.argv[1] == "highscore":
-            # do descending sort
-            # sent number if there
-            if len(sys.argv) == 2:
-                number = 10
-        elif sys.argv[1] == "inspections":
-            # do ascending sort
-            # set default result count
-            if len(sys.argv) == 2:
-                number == 10 
+        if sys.argv[1] in ("highscore", "inspections", "average"):
+            pass
         else:
-            print usage, 3
+            print usage
             sys.exit(3)
 
     if len(sys.argv) == 1:
-        print usage, 4
+        print usage
         sys.exit(4)
-
+  
+    # generate the list of hits from result_generator
+    rest_list = result_generator()
+    
+    if sys.argv[1] == 'highscore':
+        print "Sorted by High Score"
+        rest_list = sorted(rest_list, key=itemgetter('High Score'), reverse=reversed)
+        
+    if sys.argv[1] == "inspections":
+        print "Sorted by Number of Inspections"
+        rest_list = sorted(rest_list, key=itemgetter('Total Inspections'), reverse=reversed)
+    
+    if sys.argv[1] == 'average':
+        print "Sorted by Average Score"
+        rest_list = sorted(rest_list, key=itemgetter('Average Score'), reverse=reversed)
 
     total_result = {'type': 'FeatureCollection', 'features': []}
     
-    for result in result_generator(number):
+    for result in rest_list[:number]:
         geojson = get_geojson(result)
         total_result['features'].append(geojson)
     with open('my_map.json', 'w') as fh:
         json.dump(total_result, fh)
 
+    print "Done writing 'my_map.json' file"
 
-
-    for result in result_generator(number):
-        print result
-        print 
-        print
-
-    '''
-g is  the representation of total_result with (with one result only)
->>> g['features'][0]['properties']['High Score']
-92
->>> g['features'][0]['properties']['Total Inspections']
-5
->>>
-    '''
+        
